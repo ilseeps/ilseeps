@@ -1,0 +1,85 @@
+{
+    "name": "pipeline_pass_data",
+    "properties": {
+        "activities": [
+            {
+                "name": "Set input_value",
+                "type": "SetVariable",
+                "dependsOn": [],
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "input_value",
+                    "value": {
+                        "value": "1",
+                        "type": "Expression"
+                    }
+                }
+            },
+            {
+                "name": "Run notebook",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Set input_value",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": /Users/ilse/dev/notebook_pass_data,
+                    "baseParameters": {
+                        "adf_input_value": {
+                            "value": "@variables('input_value')",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Set output_value",
+                "type": "SetVariable",
+                "dependsOn": [
+                    {
+                        "activity": "Run notebook",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "output_value",
+                    "value": {
+                        "value": "@activity('Run notebook').output['runOutput']['adf_output_value'] ",
+                        "type": "Expression"
+                    }
+                }
+            }
+        ],
+        "variables": {
+            "input_value": {
+                "type": "String"
+            },
+            "output_value": {
+                "type": "String"
+            }
+        },
+        "folder": {
+            "name": "dev"
+        },
+        "annotations": []
+    }
+}
